@@ -1,0 +1,27 @@
+# Restricted Kestrel Home data files & policy (do not commit to public repo)
+*train.csv
+*test_unlabelled.csv
+*customers.csv
+*products.csv
+*sample_submission.csv
+*ops-policy.pdf
+*email-thread.txt
+*README.txt
+predictions.csv
+data/
+
+# Python / environment
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.env
+.env.*
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,168 @@
+{
+  "data_summary": {
+    "train_dedup_rows": 10504,
+    "train_dedup_return_rate": 0.1142,
+    "train_fold_rows": 8378,
+    "train_fold_return_rate": 0.114,
+    "val_fold_rows": 2126,
+    "val_fold_return_rate": 0.1152,
+    "test_rows": 2096,
+    "validation_cutoff": "2026-04-01 00:00",
+    "train_date_range": [
+      "2025-04-01 00:22",
+      "2026-06-30 23:08"
+    ],
+    "test_date_range": [
+      "2026-07-01 00:51",
+      "2026-09-30 23:46"
+    ]
+  },
+  "model_comparison": {
+    "majority_baseline": {
+      "roc_auc": 0.5,
+      "pr_auc": 0.1152,
+      "brier_score": 0.102,
+      "log_loss": 0.3573,
+      "accuracy_at_0_5": 0.8848
+    },
+    "logistic_regression": {
+      "roc_auc": 0.7816,
+      "pr_auc": 0.4056,
+      "brier_score": 0.0855,
+      "log_loss": 0.2957,
+      "accuracy_at_0_5": 0.8937
+    },
+    "hist_gradient_boosting": {
+      "roc_auc": 0.758,
+      "pr_auc": 0.3832,
+      "brier_score": 0.0873,
+      "log_loss": 0.3051,
+      "accuracy_at_0_5": 0.8937
+    },
+    "xgboost": {
+      "roc_auc": 0.7682,
+      "pr_auc": 0.3941,
+      "brier_score": 0.0865,
+      "log_loss": 0.3004,
+      "accuracy_at_0_5": 0.8951
+    }
+  },
+  "selected_model": "logistic_regression",
+  "recommended_threshold": 0.1118,
+  "threshold_analysis": [
+    {
+      "threshold": 0.1118,
+      "flagged_count": 623,
+      "flagged_pct": 0.293,
+      "tp": 159,
+      "fp": 464,
+      "tn": 1417,
+      "fn": 86,
+      "precision": 0.2552,
+      "recall": 0.649,
+      "f1": 0.3664,
+      "accuracy": 0.7413,
+      "val_net_savings_inr": 35962.5,
+      "monthly_700_calls": 205.1,
+      "monthly_700_call_cost_inr": 9230.71,
+      "monthly_700_gross_saved_inr": 21071.61,
+      "monthly_700_net_savings_inr": 11840.9
+    },
+    {
+      "threshold": 0.15,
+      "flagged_count": 445,
+      "flagged_pct": 0.2093,
+      "tp": 134,
+      "fp": 311,
+      "tn": 1570,
+      "fn": 111,
+      "precision": 0.3011,
+      "recall": 0.5469,
+      "f1": 0.3884,
+      "accuracy": 0.8015,
+      "val_net_savings_inr": 33910.0,
+      "monthly_700_calls": 146.5,
+      "monthly_700_call_cost_inr": 6593.37,
+      "monthly_700_gross_saved_inr": 17758.47,
+      "monthly_700_net_savings_inr": 11165.1
+    },
+    {
+      "threshold": 0.2,
+      "flagged_count": 300,
+      "flagged_pct": 0.1411,
+      "tp": 106,
+      "fp": 194,
+      "tn": 1687,
+      "fn": 139,
+      "precision": 0.3533,
+      "recall": 0.4327,
+      "f1": 0.389,
+      "accuracy": 0.8434,
+      "val_net_savings_inr": 29165.0,
+      "monthly_700_calls": 98.8,
+      "monthly_700_call_cost_inr": 4444.97,
+      "monthly_700_gross_saved_inr": 14047.74,
+      "monthly_700_net_savings_inr": 9602.78
+    },
+    {
+      "threshold": 0.25,
+      "flagged_count": 212,
+      "flagged_pct": 0.0997,
+      "tp": 87,
+      "fp": 125,
+      "tn": 1756,
+      "fn": 158,
+      "precision": 0.4104,
+      "recall": 0.3551,
+      "f1": 0.3807,
+      "accuracy": 0.8669,
+      "val_net_savings_inr": 25477.5,
+      "monthly_700_calls": 69.8,
+      "monthly_700_call_cost_inr": 3141.11,
+      "monthly_700_gross_saved_inr": 11529.75,
+      "monthly_700_net_savings_inr": 8388.64
+    },
+    {
+      "threshold": 0.3,
+      "flagged_count": 154,
+      "flagged_pct": 0.0724,
+      "tp": 73,
+      "fp": 81,
+      "tn": 1800,
+      "fn": 172,
+      "precision": 0.474,
+      "recall": 0.298,
+      "f1": 0.3659,
+      "accuracy": 0.881,
+      "val_net_savings_inr": 22452.5,
+      "monthly_700_calls": 50.7,
+      "monthly_700_call_cost_inr": 2281.75,
+      "monthly_700_gross_saved_inr": 9674.39,
+      "monthly_700_net_savings_inr": 7392.64
+    },
+    {
+      "threshold": 0.35,
+      "flagged_count": 114,
+      "flagged_pct": 0.0536,
+      "tp": 66,
+      "fp": 48,
+      "tn": 1833,
+      "fn": 179,
+      "precision": 0.5789,
+      "recall": 0.2694,
+      "f1": 0.3677,
+      "accuracy": 0.8932,
+      "val_net_savings_inr": 21435.0,
+      "monthly_700_calls": 37.5,
+      "monthly_700_call_cost_inr": 1689.09,
+      "monthly_700_gross_saved_inr": 8746.71,
+      "monthly_700_net_savings_inr": 7057.62
+    }
+  ],
+  "shield_breakdown": {
+    "shield_val_count": 478,
+    "shield_val_return_rate": 0.205,
+    "non_shield_val_count": 1648,
+    "non_shield_val_return_rate": 0.0892
+  }
+}

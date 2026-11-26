@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kestrel Home — Pre-Dispatch Return Risk</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --border: #dfe3e8;
+      --text: #1b2430;
+      --muted: #5c6773;
+      --primary: #155eef;
+      --high: #b42318;
+      --high-bg: #fef3f2;
+      --med: #b54708;
+      --med-bg: #fffaeb;
+      --low: #027a48;
+      --low-bg: #ecfdf3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .container {
+      max-width: 1020px;
+      margin: 28px auto;
+      padding: 0 18px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    h1 { font-size: 1.4rem; margin: 0; }
+    .subtitle { color: var(--muted); font-size: 0.92rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+    @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .card h2 { font-size: 1.05rem; margin: 0 0 12px; }
+    .samples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    button {
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+    }
+    button:hover { background: #f0f2f5; }
+    button.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      font-weight: 600;
+      padding: 10px 16px;
+      width: 100%;
+      margin-top: 12px;
+    }
+    button.primary:disabled { opacity: 0.6; cursor: wait; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      padding: 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+    .status {
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .status.loading { display: block; background: #eff4ff; color: #1d4ed8; }
+    .status.error { display: block; background: var(--high-bg); color: var(--high); border: 1px solid #fecdca; }
+    .score-box {
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+    .score-box.high { background: var(--high-bg); border-color: #fecdca; }
+    .score-box.medium { background: var(--med-bg); border-color: #fedf89; }
+    .score-box.low { background: var(--low-bg); border-color: #abefc6; }
+    .score-val { font-size: 2rem; font-weight: 700; margin: 2px 0; }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: rgba(0,0,0,0.08);
+    }
+    .reason-list { list-style: none; padding: 0; margin: 8px 0 0; }
+    .reason-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eef0f3;
+      font-size: 0.88rem;
+    }
+    .reason-list li:last-child { border-bottom: none; }
+    .up { color: var(--high); font-weight: 600; }
+    .down { color: var(--low); font-weight: 600; }
+    .caveat { font-size: 0.78rem; color: var(--muted); margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Kestrel Home — Pre-Dispatch Return Risk</h1>
+        <div class="subtitle">Local risk scorer for ₹45 pre-dispatch confirmation call triage (no auto-holds, ₹0 API cost)</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Order Details (Synthetic / Redacted Only)</h2>
+        <div class="samples">
+          <button type="button" onclick="loadSample('high')">Load High-Risk Sample</button>
+          <button type="button" onclick="loadSample('shield')">Load Shield Sample</button>
+          <button type="button" onclick="loadSample('low')">Load Low-Risk Sample</button>
+        </div>
+
+        <form id="orderForm" class="form-grid" onsubmit="submitOrder(event)">
+          <div>
+            <label for="sku">Product SKU</label>
+            <select id="sku" required>
+              <option value="KH-RV-03">KH-RV-03 (Robot Vacuum Max)</option>
+              <option value="KH-RV-01">KH-RV-01 (Robot Vacuum Lite)</option>
+              <option value="KH-WP-02">KH-WP-02 (Water Purifier Pro)</option>
+              <option value="KH-AF-02">KH-AF-02 (Air Fryer Pro)</option>
+              <option value="KH-MG-01">KH-MG-01 (Mixer Grinder Lite)</option>
+              <option value="KH-CF-01">KH-CF-01 (Ceiling Fan Lite)</option>
+              <option value="KH-IC-02">KH-IC-02 (Induction Cooktop Pro)</option>
+              <option value="KH-RH-01">KH-RH-01 (Room Heater Lite)</option>
+            </select>
+          </div>
+          <div>
+            <label for="sales_channel">Sales Channel</label>
+            <select id="sales_channel" required>
+              <option value="marketplace">marketplace</option>
+              <option value="app">app</option>
+              <option value="web">web</option>
+              <option value="partner_outlet">partner_outlet</option>
+            </select>
+          </div>
+          <div>
+            <label for="payment_mode">Payment Mode</label>
+            <select id="payment_mode" required>
+              <option value="cod">cod</option>
+              <option value="prepaid_upi">prepaid_upi</option>
+              <option value="prepaid_card">prepaid_card</option>
+              <option value="emi">emi</option>
+            </select>
+          </div>
+          <div>
+            <label for="shield_member">Shield Member</label>
+            <select id="shield_member" required>
+              <option value="N">N</option>
+              <option value="Y">Y</option>
+            </select>
+          </div>
+          <div>
+            <label for="order_value_inr">Order Value (INR)</label>
+            <input id="order_value_inr" type="number" step="0.01" min="1" required />
+          </div>
+          <div>
+            <label for="discount_pct">Discount (%)</label>
+            <input id="discount_pct" type="number" step="0.1" min="0" max="100" required />
+          </div>
+          <div>
+            <label for="qty">Quantity</label>
+            <input id="qty" type="number" min="1" max="50" required />
+          </div>
+          <div>
+            <label for="promised_delivery_days">Promised Delivery (Days)</label>
+            <input id="promised_delivery_days" type="number" min="1" max="60" required />
+          </div>
+          <div>
+            <label for="customer_prior_orders">Prior Orders</label>
+            <input id="customer_prior_orders" type="number" min="0" required />
+          </div>
+          <div>
+            <label for="customer_prior_returns">Prior Returns</label>
+            <input id="customer_prior_returns" type="number" min="0" required />
+          </div>
+          <div>
+            <label for="is_gift">Gift Order</label>
+            <select id="is_gift" required>
+              <option value="N">N</option>
+              <option value="Y">Y</option>
+            </select>
+          </div>
+          <div>
+            <label for="state">State Code</label>
+            <input id="state" type="text" maxlength="10" required />
+          </div>
+          <div>
+            <label for="delivery_pincode">Delivery Pincode</label>
+            <input id="delivery_pincode" type="text" maxlength="10" required />
+          </div>
+          <div>
+            <label for="order_placed_at">Order Placed At (IST)</label>
+            <input id="order_placed_at" type="text" required />
+          </div>
+          <div>
+            <label for="signup_date">Customer Signup Date</label>
+            <input id="signup_date" type="text" required />
+          </div>
+          <div class="full">
+            <label for="delivery_note">Delivery Note (Optional, synthetic)</label>
+            <input id="delivery_note" type="text" placeholder="e.g. Call before delivery" />
+          </div>
+          <div class="full">
+            <button id="submitBtn" class="primary" type="submit">Score Return Risk</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Risk Assessment</h2>
+        <div id="statusBox" class="status"></div>
+        <div id="resultBox">
+          <p class="subtitle">Select a synthetic sample or enter order details and click <strong>Score Return Risk</strong>.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const SAMPLES = {
+      high: {
+        sku: "KH-RV-03",
+        sales_channel: "marketplace",
+        payment_mode: "cod",
+        shield_member: "N",
+        order_value_inr: 28213.10,
+        discount_pct: 5,
+        qty: 1,
+        promised_delivery_days: 9,
+        customer_prior_orders: 2,
+        customer_prior_returns: 2,
+        is_gift: "Y",
+        state: "KA",
+        delivery_pincode: "560001",
+        order_placed_at: "2026-08-15 14:30",
+        signup_date: "2025-11-10",
+        delivery_note: "Do not call, WhatsApp only"
+      },
+      shield: {
+        sku: "KH-WP-02",
+        sales_channel: "app",
+        payment_mode: "prepaid_upi",
+        shield_member: "Y",
+        order_value_inr: 13499.10,
+        discount_pct: 10,
+        qty: 1,
+        promised_delivery_days: 6,
+        customer_prior_orders: 4,
+        customer_prior_returns: 1,
+        is_gift: "N",
+        state: "MH",
+        delivery_pincode: "400001",
+        order_placed_at: "2026-08-18 11:15",
+        signup_date: "2024-05-01",
+        delivery_note: "Leave with security"
+      },
+      low: {
+        sku: "KH-MG-01",
+        sales_channel: "partner_outlet",
+        payment_mode: "prepaid_upi",
+        shield_member: "N",
+        order_value_inr: 2879.10,
+        discount_pct: 10,
+        qty: 1,
+        promised_delivery_days: 3,
+        customer_prior_orders: 2,
+        customer_prior_returns: 0,
+        is_gift: "N",
+        state: "TN",
+        delivery_pincode: "600001",
+        order_placed_at: "2026-08-20 16:00",
+        signup_date: "2023-09-12",
+        delivery_note: ""
+      }
+    };
+
+    function loadSample(key) {
+      const s = SAMPLES[key];
+      Object.entries(s).forEach(([k, v]) => {
+        const el = document.getElementById(k);
+        if (el) el.value = v;
+      });
+    }
+
+    async function submitOrder(e) {
+      e.preventDefault();
+      const statusBox = document.getElementById("statusBox");
+      const resultBox = document.getElementById("resultBox");
+      const btn = document.getElementById("submitBtn");
+
+      statusBox.className = "status loading";
+      statusBox.textContent = "Scoring order...";
+      btn.disabled = true;
+
+      const payload = {
+        sku: document.getElementById("sku").value,
+        sales_channel: document.getElementById("sales_channel").value,
+        payment_mode: document.getElementById("payment_mode").value,
+        shield_member: document.getElementById("shield_member").value,
+        order_value_inr: parseFloat(document.getElementById("order_value_inr").value),
+        discount_pct: parseFloat(document.getElementById("discount_pct").value),
+        qty: parseInt(document.getElementById("qty").value, 10),
+        promised_delivery_days: parseInt(document.getElementById("promised_delivery_days").value, 10),
+        customer_prior_orders: parseInt(document.getElementById("customer_prior_orders").value, 10),
+        customer_prior_returns: parseInt(document.getElementById("customer_prior_returns").value, 10),
+        is_gift: document.getElementById("is_gift").value,
+        state: document.getElementById("state").value.trim(),
+        delivery_pincode: document.getElementById("delivery_pincode").value.trim(),
+        order_placed_at: document.getElementById("order_placed_at").value.trim(),
+        signup_date: document.getElementById("signup_date").value.trim(),
+        delivery_note: document.getElementById("delivery_note").value
+      };
+
+      try {
+        const res = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          const msg = Array.isArray(data.detail)
+            ? data.detail.map(d => `${d.loc?.slice(-1)[0]}: ${d.msg}`).join("; ")
+            : (data.detail || "Validation error");
+          throw new Error(msg);
+        }
+
+        statusBox.className = "status";
+        statusBox.textContent = "";
+
+        const reasonsHtml = (data.reasons || []).map(r => {
+          const cls = r.direction === "increases_risk" ? "up" : "down";
+          const sign = r.direction === "increases_risk" ? "+" : "";
+          return `<li><span>${r.factor}</span><span class="${cls}">${sign}${r.log_odds_impact.toFixed(2)}</span></li>`;
+        }).join("");
+
+        resultBox.innerHTML = `
+          <div class="score-box ${data.risk_band}">
+            <span class="badge">${data.risk_band} risk</span>
+            <div class="score-val">${data.risk_pct.toFixed(1)}%</div>
+            <div><strong>Action:</strong> ${data.recommended_action}</div>
+            <div class="subtitle">Score: ${data.score.toFixed(4)} (triage threshold: ${data.threshold_used})</div>
+          </div>
+          <strong>Top Model Drivers (log-odds impact)</strong>
+          <ul class="reason-list">${reasonsHtml || "<li>No dominant single factor</li>"}</ul>
+          <div class="caveat">${data.caveat}</div>
+        `;
+      } catch (err) {
+        statusBox.className = "status error";
+        statusBox.textContent = `Error: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    loadSample("high");
+  </script>
+</body>
+</html>
